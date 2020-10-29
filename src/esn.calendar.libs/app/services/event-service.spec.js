@@ -21,7 +21,7 @@ describe('The calEventService service', function() {
       getNewToken: function() {
         var token = this._token;
 
-        return $q.when({ data: { token: token } });
+        return $q.when({ data: { token } });
       }
     };
 
@@ -74,6 +74,12 @@ describe('The calEventService service', function() {
       emitModifiedEvent: sinon.spy()
     };
 
+    self.calCalDAVURLService = {
+      getFrontendURL() {
+        return $q.when('/dav/api');
+      }
+    };
+
     angular.mock.module('esn.resource.libs');
     angular.mock.module('esn.calendar.libs');
     angular.mock.module('esn.ical');
@@ -92,6 +98,7 @@ describe('The calEventService service', function() {
       $provide.value('esnI18nService', {
         translate: function(input) { return input; }
       });
+      $provide.value('calCalDAVURLService', self.calCalDAVURLService);
       $provide.constant('CAL_GRACE_DELAY_IS_ACTIVE', self.CAL_GRACE_DELAY_IS_ACTIVE_MOCK);
       $provide.decorator('calMasterEventCache', function($delegate) {
         self.calMasterEventCache = {
@@ -779,6 +786,7 @@ describe('The calEventService service', function() {
         'Content-Type': 'application/calendar+json',
         Prefer: 'return=representation',
         'If-Match': 'etag',
+        ESNToken: '123',
         Accept: 'application/json, text/plain, */*'
       };
 

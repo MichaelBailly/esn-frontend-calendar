@@ -5,9 +5,26 @@ describe('The calCalendarSubscriptionApiService factory', function() {
   var calendarHomeId, subscriptionId, subscription;
 
   beforeEach(function() {
+    const tokenAPI = {
+      _token: '123',
+      getNewToken: function() {
+        var token = this._token;
+
+        return $q.when({ data: { token } });
+      }
+    };
+
+    const calCalDAVURLService = {
+      getFrontendURL() {
+        return $q.when('/dav/api');
+      }
+    };
+
     angular.mock.module('esn.resource.libs');
     angular.mock.module('esn.calendar.libs', function($provide) {
       $provide.value('Cache', function() {});
+      $provide.value('tokenAPI', tokenAPI);
+      $provide.value('calCalDAVURLService', calCalDAVURLService);
     });
 
     calendarHomeId = '123';

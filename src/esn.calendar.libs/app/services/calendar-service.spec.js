@@ -26,6 +26,21 @@ describe('The calendarService service', function() {
       return CalendarCollectionShellFuncMock.apply(this, arguments);
     };
 
+    const tokenAPI = {
+      _token: '123',
+      getNewToken: function() {
+        var token = this._token;
+
+        return $q.when({ data: { token } });
+      }
+    };
+
+    const calCalDAVURLService = {
+      getFrontendURL() {
+        return $q.when('/dav/api');
+      }
+    };
+
     listCalendars = null;
     calendarsCacheMock = {
       getList: sinon.stub().returns(listCalendars),
@@ -47,6 +62,8 @@ describe('The calendarService service', function() {
       $provide.value('CalendarRightShell', CalendarRightShellMock);
       $provide.value('calendarsCache', calendarsCacheMock);
       $provide.value('userUtils', userUtilsMock);
+      $provide.value('tokenAPI', tokenAPI);
+      $provide.value('calCalDAVURLService', calCalDAVURLService);
     });
   });
 

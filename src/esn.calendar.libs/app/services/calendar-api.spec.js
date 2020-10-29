@@ -28,11 +28,28 @@ describe('The calendar module apis', function() {
     };
   }
 
+  const tokenAPI = {
+    _token: '123',
+    getNewToken: function() {
+      var token = this._token;
+
+      return $q.when({ data: { token } });
+    }
+  };
+
+  const calCalDAVURLService = {
+    getFrontendURL() {
+      return $q.when('/dav/api');
+    }
+  };
+
   beforeEach(function() {
     angular.mock.module('esn.calendar.libs');
 
     angular.mock.module(function($provide) {
       $provide.value('notificationFactory', notificationFactoryMock);
+      $provide.value('tokenAPI', tokenAPI);
+      $provide.value('calCalDAVURLService', calCalDAVURLService);
     });
 
     inject(function($httpBackend, calendarRestangular, calMoment, calendarAPI, calEventAPI, CALENDAR_CONTENT_TYPE_HEADER, CAL_ACCEPT_HEADER, CAL_GRACE_DELAY, _ELEMENTS_PER_REQUEST_) {
@@ -113,7 +130,7 @@ describe('The calendar module apis', function() {
       it('should request the correct path and return an array of items included in dav:item', function(done) {
         this.$httpBackend.expect('REPORT', '/dav/api/calendars/test/events.json', this.data, headerContentTypeJsonChecker).respond(davItemsResponse(davItems));
 
-        this.calendarAPI.listEvents('/dav/api/calendars/test/events.json', this.start, this.end)
+        this.calendarAPI.listEvents('/calendars/test/events.json', this.start, this.end)
           .then(function(data) {
             expect(data).to.deep.equal(davItems);
             done();
@@ -124,7 +141,7 @@ describe('The calendar module apis', function() {
 
       it('should return an empty array if response.data is not defined', function(done) {
         this.$httpBackend.expect('REPORT', '/dav/api/calendars/test/events.json', this.data, headerContentTypeJsonChecker).respond(null);
-        this.calendarAPI.listEvents('/dav/api/calendars/test/events.json', this.start, this.end)
+        this.calendarAPI.listEvents('/calendars/test/events.json', this.start, this.end)
           .then(function(data) {
             expect(data).to.deep.equal([]);
             done();
@@ -140,7 +157,7 @@ describe('The calendar module apis', function() {
           },
           _embedded: null
         });
-        this.calendarAPI.listEvents('/dav/api/calendars/test/events.json', this.start, this.end)
+        this.calendarAPI.listEvents('/calendars/test/events.json', this.start, this.end)
           .then(function(data) {
             expect(data).to.deep.equal([]);
             done();
@@ -158,7 +175,7 @@ describe('The calendar module apis', function() {
           }
         });
 
-        this.calendarAPI.listEvents('/dav/api/calendars/test/events.json', this.start, this.end)
+        this.calendarAPI.listEvents('/calendars/test/events.json', this.start, this.end)
           .then(function(data) {
             expect(data).to.deep.equal([]);
             done();
@@ -168,7 +185,7 @@ describe('The calendar module apis', function() {
 
       it('should return an Error if response.status is not 200', function(done) {
         this.$httpBackend.expect('REPORT', '/dav/api/calendars/test/events.json', this.data, headerContentTypeJsonChecker).respond(500, 'Error');
-        this.calendarAPI.listEvents('/dav/api/calendars/test/events.json', this.start, this.end)
+        this.calendarAPI.listEvents('/calendars/test/events.json', this.start, this.end)
           .catch(function(err) {
             expect(err).to.exist;
             done();

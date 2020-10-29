@@ -25,17 +25,35 @@ describe('The calFreebusyAPI service', function() {
     };
   }
 
+  const tokenAPI = {
+    _token: '123',
+    getNewToken: function() {
+      var token = this._token;
+
+      return $q.when({ data: { token } });
+    }
+  };
+
+  const calCalDAVURLService = {
+    getFrontendURL() {
+      return $q.when('');
+    }
+  };
+
   beforeEach(function() {
     angular.mock.module('esn.calendar.libs');
 
     angular.mock.module(function($provide) {
       $provide.value('notificationFactory', notificationFactoryMock);
+      $provide.value('tokenAPI', tokenAPI);
+      $provide.value('calCalDAVURLService', calCalDAVURLService);
     });
 
-    angular.mock.inject(function($httpBackend, calMoment, calFreebusyAPI) {
+    angular.mock.inject(function($httpBackend, CAL_DAV_PATH, calMoment, calFreebusyAPI) {
       this.$httpBackend = $httpBackend;
       this.calMoment = calMoment;
       this.calFreebusyAPI = calFreebusyAPI;
+      this.CAL_DAV_PATH = CAL_DAV_PATH;
     });
 
     var davDateFormat = 'YYYYMMDD[T]HHmmss';
@@ -124,7 +142,7 @@ describe('The calFreebusyAPI service', function() {
     var bulkRequest, users, freeBusyEndpoint, davDateFormat;
 
     beforeEach(function() {
-      freeBusyEndpoint = '/dav/api/calendars/freebusy';
+      freeBusyEndpoint = `${this.CAL_DAV_PATH}/calendars/freebusy`;
       davDateFormat = 'YYYYMMDD[T]HHmmss';
       users = [1, 2];
       bulkRequest = {

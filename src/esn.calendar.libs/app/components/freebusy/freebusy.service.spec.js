@@ -8,7 +8,24 @@ describe('The calFreebusyService service', function() {
   var vfreebusy, $httpBackend, $rootScope, calFreebusyService, calMoment, CAL_ACCEPT_HEADER, CAL_DAV_DATE_FORMAT, CAL_FREEBUSY;
   var calAttendeeService, calFreebusyAPI;
 
+  const REQUEST_HEADERS_BASE = { ESNToken: '123' };
+
   beforeEach(function() {
+    const tokenAPI = {
+      _token: '123',
+      getNewToken: function() {
+        var token = this._token;
+
+        return $q.when({ data: { token } });
+      }
+    };
+
+    const calCalDAVURLService = {
+      getFrontendURL() {
+        return $q.when('/dav/api');
+      }
+    };
+
     angular.mock.module('esn.resource.libs');
     angular.mock.module('esn.calendar.libs');
 
@@ -19,6 +36,8 @@ describe('The calFreebusyService service', function() {
 
     angular.mock.module(function($provide) {
       $provide.value('calAttendeeService', calAttendeeService);
+      $provide.value('tokenAPI', tokenAPI);
+      $provide.value('calCalDAVURLService', calCalDAVURLService);
     });
   });
 
@@ -78,7 +97,9 @@ describe('The calFreebusyService service', function() {
         }
       };
 
-      $httpBackend.expectGET('/dav/api/calendars/uid.json?withFreeBusy=true&withRights=true', { Accept: CAL_ACCEPT_HEADER }).respond(response);
+      $httpBackend
+        .expectGET('/dav/api/calendars/uid.json?withFreeBusy=true&withRights=true', { ...REQUEST_HEADERS_BASE, Accept: CAL_ACCEPT_HEADER })
+        .respond(response);
 
       $httpBackend.expect('REPORT', '/dav/api/calendars/uid/events.json', data).respond(200, {
         _links: {
@@ -111,7 +132,7 @@ describe('The calFreebusyService service', function() {
     beforeEach(function() {
       attendee = { id: 'uid' };
 
-      handleBackend = function handleBackned() {
+      handleBackend = function handleBackend() {
         var response;
 
         response = {
@@ -138,7 +159,9 @@ describe('The calFreebusyService service', function() {
           }
         };
 
-        $httpBackend.expectGET('/dav/api/calendars/uid.json?withFreeBusy=true&withRights=true', { Accept: CAL_ACCEPT_HEADER }).respond(response);
+        $httpBackend
+          .expectGET('/dav/api/calendars/uid.json?withFreeBusy=true&withRights=true', { ...REQUEST_HEADERS_BASE, Accept: CAL_ACCEPT_HEADER })
+          .respond(response);
         $httpBackend.expect('REPORT', '/dav/api/calendars/uid/events.json', undefined).respond(200, {
           _links: {
             self: { href: '/prepath/path/to/calendar.json' }
